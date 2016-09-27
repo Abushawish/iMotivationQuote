@@ -14,10 +14,40 @@
 @end
 
 @implementation TodayViewController
-@synthesize quoteToDisplay, quoteText_Label, quoteAuthor_Label;
+@synthesize quoteToDisplay, quoteText_Label, quoteAuthor_Label, imageToDisplay;
+
+- (NSImage *)imageResize:(NSImage*)anImage {
+    NSImage *sourceImage = anImage;
+    //[sourceImage setScalesWhenResized:YES];
+    float oldWidth = sourceImage.size.width+20;
+    float scaleFactor = self.view.frame.size.width / oldWidth;
+    
+    float newHeight = sourceImage.size.height * scaleFactor;
+    float newWidth = oldWidth * scaleFactor;
+    
+    NSSize newSize = NSMakeSize (newWidth+20, newHeight);
+    
+    // Report an error if the source isn't a valid image
+    if (![sourceImage isValid]){
+        NSLog(@"Invalid Image");
+    } else {
+        NSImage *smallImage = [[NSImage alloc] initWithSize: newSize];
+        [smallImage lockFocus];
+        [sourceImage setSize: newSize];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+        [sourceImage drawAtPoint:NSZeroPoint fromRect:CGRectMake(0, 0, newSize.width, newSize.height) operation:NSCompositeCopy fraction:1.0];
+        [smallImage unlockFocus];
+        return smallImage;
+    }
+    return nil;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [imageToDisplay setImageScaling:NSImageScaleNone];
+    imageToDisplay.image = [self imageResize:[NSImage imageNamed:@"XhGsjTN.jpg"]];
+    
+    
     [self refresh];
 }
 
@@ -45,7 +75,14 @@
                                                       @"\"%@\"", quoteText];
                 self.quoteAuthor_Label.stringValue = [NSString stringWithFormat:
                                                       @"-%@", quoteAuthor];
-                NSLog(@"%@", [quoteText_Label stringValue]);
+                NSLog(@"%@", [quoteText_Label string]);
+                
+//                
+//                NSAttributedString *string = [[NSAttributedString alloc] initWithString:@"String" attributes:@{ NSStrokeColorAttributeName : [CIColor blackColor], NSForegroundColorAttributeName : [CIColor blackColor], NSStrokeWidthAttributeName : @-1.0 }];
+//                
+//                [quoteText_Label setEditable:YES];
+//                [quoteText_Label insertText: string];
+//                [quoteText_Label setEditable:NO];
             } else {
                 [self refresh];
             }
@@ -66,6 +103,10 @@
             self.quoteAuthor_Label.stringValue = @"Error Unknown.";
             break;
     }
+}
+
+-(NSEdgeInsets)widgetMarginInsetsForProposedMarginInsets:(NSEdgeInsets)defaultMarginInsets {
+    return NSEdgeInsetsZero;
 }
 
 - (void)widgetPerformUpdateWithCompletionHandler:(void (^)(NCUpdateResult result))completionHandler {

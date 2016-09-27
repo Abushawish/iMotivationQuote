@@ -13,7 +13,7 @@
 
 @property (nonatomic, copy) Quote *quoteFetched;
 
--(NSInteger) retrieveAndParseJson;
+-(NSInteger) retrieveAndParseJsonQuote;
 -(Quote*)    getFetchedQuote;
 
 @end

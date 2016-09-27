@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "Quote.h"
 #import "Networking.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface TodayViewController : NSViewController
 
@@ -16,7 +17,9 @@
 @property (weak) IBOutlet NSTextField *quoteText_Label;
 @property (weak) IBOutlet NSTextField *quoteAuthor_Label;
 @property (weak) IBOutlet NSButton *refresh_Button;
+@property (weak) IBOutlet NSImageView *imageToDisplay;
 
 - (IBAction)refreshButtonClick:(id)sender;
+- (NSImage *)imageResize:(NSImage*)anImage;
 
 @end

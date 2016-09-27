@@ -12,7 +12,7 @@
 @synthesize quoteFetched;
 
 
-- (NSInteger)retrieveAndParseJson {
+- (NSInteger)retrieveAndParseJsonQuote {
     
     //Prepare POST request details
     NSInteger success             = 1;
@@ -50,7 +50,7 @@
         if (success == 0) {
             NSString *quoteText   = jsonData[@"quoteText"];
             NSString *quoteAuthor = jsonData[@"quoteAuthor"];
-            NSString *quoteLink   =  jsonData[@"quoteLink"];
+            NSString *quoteLink   = jsonData[@"quoteLink"];
             quoteFetched          = [[Quote alloc] initWithQuoteText:quoteText
                                                       andQuoteAuthor:quoteAuthor
                                                         andQuoteLink:quoteLink];
@@ -63,6 +63,54 @@
         return 2; //Cannot communicate with server
     }
 }
+
+- (NSInteger)retrieveAndParseJsonImg {
+    
+    //Prepare POST request details
+    NSInteger success             = 1;
+    NSURL     *url                = [NSURL URLWithString:
+                                     @"https://api.imgur.com/3/gallery/r/{subreddit}/{sort}/{page}"];
+    NSString  *post               = [NSString stringWithFormat:
+                                     @"method=getQuote&format=json&lang=en"];
+    NSData    *postData           = [post dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableURLRequest *request  = [[NSMutableURLRequest alloc] init];
+    
+    [request setURL:url];
+    [request setHTTPMethod:@"GET"];
+    
+    NSError *requestError       = [[NSError alloc] init];
+    NSHTTPURLResponse *response = nil;
+    NSData *urlData             = [NSURLConnection sendSynchronousRequest:request
+                                                        returningResponse:&response
+                                                                    error:&requestError];
+    
+    //Communication succeeded
+    if ([response statusCode] >= 200 && [response statusCode] < 300) {
+        NSError *serializeError = nil;
+        NSDictionary *jsonData  = [NSJSONSerialization
+                                   JSONObjectWithData:urlData
+                                   options:NSJSONReadingMutableContainers
+                                   error:&serializeError];
+        success                 = [jsonData[@"ERROR"] integerValue];
+        
+        if (success == 0) {
+            NSString *quoteText   = jsonData[@"quoteText"];
+            NSString *quoteAuthor = jsonData[@"quoteAuthor"];
+            NSString *quoteLink   = jsonData[@"quoteLink"];
+            quoteFetched          = [[Quote alloc] initWithQuoteText:quoteText
+                                                      andQuoteAuthor:quoteAuthor
+                                                        andQuoteLink:quoteLink];
+            NSLog(@"%@", quoteFetched.quoteText);
+            return 0; //No error
+        } else {
+            return 1; //Error from server
+        }
+    } else {
+        return 2; //Cannot communicate with server
+    }
+}
+
+
 
 -(Quote*) getFetchedQuote {
     return quoteFetched;
